@@ -1,6 +1,8 @@
 import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
+import os
+from pathlib import Path
 from typing import List, Dict, Mapping, Optional, Callable
 from urllib.parse import urlparse
 
@@ -12,6 +14,7 @@ from pyctuator.httptrace.http_tracer import HttpTracer
 from pyctuator.logfile.logfile import PyctuatorLogfile  # type: ignore
 from pyctuator.logging.pyctuator_logging import PyctuatorLogging
 from pyctuator.metrics.metrics_provider import Metric, MetricNames, MetricsProvider
+from pyctuator.testing.scheduler import TestRunScheduler
 from pyctuator.threads.thread_dump_provider import ThreadDump, ThreadDumpProvider
 
 
@@ -75,10 +78,30 @@ class PyctuatorImpl:
 
         self.secret_scrubber: Callable[[Dict], Dict] = SecretScrubber().scrub_secrets
 
+        # path where test artifacts should be stored
+        self.test_results_path = Path(
+            os.getenv("PYCTUATOR_TEST_RESULTS_PATH", "test_results")
+        )
+        self.test_scheduler: Optional[TestRunScheduler] = None
+
         # Determine the endpoint's URL path prefix and make sure it doesn't end with a "/"
         self.pyctuator_endpoint_path_prefix = urlparse(pyctuator_endpoint_url).path
         if self.pyctuator_endpoint_path_prefix[-1:] == "/":
             self.pyctuator_endpoint_path_prefix = self.pyctuator_endpoint_path_prefix[:-1]
+
+        # Start the test run scheduler if configured
+        interval_env = os.getenv("PYCTUATOR_TEST_SCHEDULE_INTERVAL")
+        if interval_env:
+            try:
+                interval = int(interval_env)
+                if interval > 0:
+                    upload_url = os.getenv("PYCTUATOR_TEST_UPLOAD_URL")
+                    self.test_scheduler = TestRunScheduler(
+                        interval, upload_url, self.test_results_path
+                    )
+                    self.test_scheduler.start()
+            except ValueError:
+                pass
 
     def register_metrics_provider(self, provider: MetricsProvider) -> None:
         self.metrics_providers.append(provider)
