@@ -335,6 +335,24 @@ Pyctuator(
 Since there are numerous standard approaches to protect an API, Pyctuator doesn't explicitly support any of them. Instead, Pyctuator allows to customize its integration with the web-framework.
 See the example in [fastapi_with_authentication_example_app.py](examples/FastAPI/fastapi_with_authentication_example_app.py).
 
+### Periodic test runs
+Pyctuator can optionally execute your project's test-suite on a schedule.
+When enabled, Pyctuator spawns a background thread that periodically runs
+``pytest`` and stores the generated ``coverage.json`` and ``test_report.json``
+artifacts.  Set the environment variable ``PYCTUATOR_TEST_SCHEDULE_INTERVAL``
+to the desired interval in seconds.  To automatically upload the JSON
+payload to a remote server set ``PYCTUATOR_TEST_UPLOAD_URL`` to the desired
+URL.
+
+```bash
+export PYCTUATOR_TEST_SCHEDULE_INTERVAL=3600
+export PYCTUATOR_TEST_UPLOAD_URL="http://example.com/upload"
+```
+
+The generated artifacts are written to ``PyctuatorImpl.test_results_path``
+which defaults to the ``test_results`` directory in the current working
+directory.
+
 ## Full blown examples
 The `examples` folder contains full blown Python projects that are built using [Poetry](https://python-poetry.org/).
 
