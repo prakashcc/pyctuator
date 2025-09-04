@@ -66,3 +66,7 @@ redis = ["redis"]
 [build-system]
 requires = ["poetry>=1.1"]
 build-backend = "poetry.masonry.api"
+
+[tool.pytest.ini_options]
+# The reporting plugin can be enabled with: -p pyctuator.pytest_plugin
+addopts = ""
