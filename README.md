@@ -351,6 +351,21 @@ The examples include
 * [Flask Example](examples/Flask/README.md) - demonstrates integrating Pyctuator with the Flask web framework.
 * [Advanced Example](examples/Advanced/README.md) - demonstrates configuring and using all the advanced features of Pyctuator.
 
+## Pytest reporting plugin
+Pyctuator includes an optional `pytest` plugin that can publish test results and coverage
+information to an external service.
+
+To enable the plugin set the environment variable `PYCTUATOR_TEST_RESULTS_URL` to the
+destination server and run `pytest` with the plugin enabled:
+
+```bash
+pytest --json-report --cov=<package-under-test> -p pyctuator.pytest_plugin
+```
+
+The plugin merges the coverage data collected by `coverage.py` with the
+`pytest-json-report` output and POSTs the resulting JSON payload to the configured URL.
+
+
 ## Contributing
 To set up a development environment, make sure you have Python 3.9 or newer installed, and run `make bootstrap`.
 
